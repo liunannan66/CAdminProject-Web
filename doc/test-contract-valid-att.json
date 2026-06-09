@@ -1,0 +1,32 @@
+{
+  "contractNo": "HT-ATT-VALID-001",
+  "customerName": "附件修复测试",
+  "signDate": "2026-06-05",
+  "contractType": "self",
+  "deliveryDate": "2026-06-05",
+  "salesOwner": "张三",
+  "quoteAmount": 1,
+  "milestone": "里程碑",
+  "remark": "备注",
+  "contractAttachmentIds": [13],
+  "requirementAttachmentIds": [],
+  "paymentLines": [
+    {
+      "termName": "测试合同",
+      "settlementMethod": "prepay",
+      "paymentRatio": 1,
+      "node": "测试",
+      "remark": "备注"
+    }
+  ],
+  "productLines": [
+    {
+      "productId": 2,
+      "productName": "TestProduct",
+      "categoryLabel": "第三方产品",
+      "version": "V1",
+      "quantity": 1,
+      "amountWithTax": 1
+    }
+  ]
+}

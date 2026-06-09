@@ -1,0 +1,32 @@
+{
+  "contractNo": "HT-TEST-ATT-001",
+  "customerName": "附件测试客户",
+  "signDate": "2026-06-03",
+  "contractType": "self",
+  "deliveryDate": "2026-12-31",
+  "salesOwner": "测试销售",
+  "quoteAmount": 100000,
+  "milestone": "测试里程碑",
+  "remark": "附件绑定测试",
+  "contractAttachmentIds": [3],
+  "requirementAttachmentIds": [4],
+  "paymentLines": [
+    {
+      "termName": "预付款",
+      "settlementMethod": "prepay",
+      "paymentRatio": 100,
+      "node": "签约后",
+      "remark": ""
+    }
+  ],
+  "productLines": [
+    {
+      "productId": 1,
+      "productName": "金蝶云·星空",
+      "categoryLabel": "主产品",
+      "version": "旗舰版",
+      "quantity": 1,
+      "amountWithTax": 100000
+    }
+  ]
+}

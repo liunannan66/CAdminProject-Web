@@ -1,0 +1,12 @@
+{
+  "id": null,
+  "contractNo": "HT-NRE-NULL-ID",
+  "customerName": "test",
+  "signDate": "2026-06-03",
+  "contractType": "self",
+  "deliveryDate": "2026-12-31",
+  "salesOwner": "test",
+  "quoteAmount": 1,
+  "paymentLines": [{ "termName": "a", "settlementMethod": "prepay", "paymentRatio": 100, "node": "b" }],
+  "productLines": [{ "productId": 1, "quantity": 1, "amountWithTax": 1 }]
+}

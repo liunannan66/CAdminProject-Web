@@ -1,0 +1,30 @@
+{
+  "contractNo": "HT-STR-ID-001",
+  "customerName": "x",
+  "signDate": "2026-06-03",
+  "contractType": "self",
+  "deliveryDate": "2026-12-31",
+  "salesOwner": "x",
+  "quoteAmount": 1,
+  "contractAttachmentIds": ["8"],
+  "requirementAttachmentIds": [],
+  "paymentLines": [
+    {
+      "termName": "a",
+      "settlementMethod": "prepay",
+      "paymentRatio": 100,
+      "node": "b",
+      "remark": ""
+    }
+  ],
+  "productLines": [
+    {
+      "productId": 1,
+      "productName": "p",
+      "categoryLabel": "m",
+      "version": "v",
+      "quantity": 1,
+      "amountWithTax": 1
+    }
+  ]
+}

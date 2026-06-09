@@ -1,0 +1,32 @@
+{
+  "contractNo": "HT-ATT-18-ONLY",
+  "customerName": "test",
+  "signDate": "2026-06-05",
+  "contractType": "self",
+  "deliveryDate": "2026-06-05",
+  "salesOwner": "test",
+  "quoteAmount": 1,
+  "milestone": "m",
+  "remark": "r",
+  "contractAttachmentIds": [18],
+  "requirementAttachmentIds": [],
+  "paymentLines": [
+    {
+      "termName": "a",
+      "settlementMethod": "prepay",
+      "paymentRatio": 1,
+      "node": "b",
+      "remark": ""
+    }
+  ],
+  "productLines": [
+    {
+      "productId": 2,
+      "productName": "TestProduct",
+      "categoryLabel": "main",
+      "version": "V1",
+      "quantity": 1,
+      "amountWithTax": 1
+    }
+  ]
+}

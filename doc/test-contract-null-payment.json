@@ -1,0 +1,20 @@
+{
+  "contractNo": "HT-NULL-TEST-001",
+  "customerName": "x",
+  "signDate": "2026-06-03",
+  "contractType": "self",
+  "deliveryDate": "2026-12-31",
+  "salesOwner": "x",
+  "quoteAmount": 1,
+  "paymentLines": null,
+  "productLines": [
+    {
+      "productId": 1,
+      "productName": "p",
+      "categoryLabel": "m",
+      "version": "v",
+      "quantity": 1,
+      "amountWithTax": 1
+    }
+  ]
+}

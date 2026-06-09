@@ -1,0 +1,26 @@
+{
+  "contractNo": "HT-ATT-BOTH-002",
+  "customerName": "test",
+  "signDate": "2026-06-05",
+  "contractType": "self",
+  "deliveryDate": "2026-06-05",
+  "salesOwner": "test",
+  "quoteAmount": 1,
+  "contractAttachmentIds": [20],
+  "requirementAttachmentIds": [21],
+  "paymentLines": [
+    {
+      "termName": "a",
+      "settlementMethod": "prepay",
+      "paymentRatio": 100,
+      "node": "b"
+    }
+  ],
+  "productLines": [
+    {
+      "productId": 2,
+      "quantity": 1,
+      "amountWithTax": 1
+    }
+  ]
+}

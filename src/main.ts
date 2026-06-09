@@ -1,0 +1,43 @@
+import { createApp } from 'vue';
+import './plugins/assets';
+import ElementPlus from 'element-plus';
+import {
+  setupAppVersionNotification,
+  setupDayjs,
+  setupIconifyOffline,
+  setupLoading,
+  setupNProgress,
+  setupUI
+} from './plugins';
+import { setupStore } from './store';
+import { setupRouter } from './router';
+import { setupI18n } from './locales';
+import App from './App.vue';
+
+async function setupApp() {
+  setupLoading();
+
+  setupNProgress();
+
+  setupIconifyOffline();
+
+  setupDayjs();
+
+  const app = createApp(App);
+
+  app.use(ElementPlus);
+
+  setupUI(app);
+
+  setupStore(app);
+
+  await setupRouter(app);
+
+  setupI18n(app);
+
+  setupAppVersionNotification();
+
+  app.mount('#app');
+}
+
+setupApp();

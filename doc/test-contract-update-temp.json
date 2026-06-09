@@ -1,0 +1,16 @@
+﻿{
+  "id": ,
+  "contractNo": "HT-NRE-FIX-20260603",
+  "customerName": "NRE修复测试更新",
+  "signDate": "2026-06-03",
+  "contractType": "self",
+  "deliveryDate": "2026-12-31",
+  "salesOwner": "测试销售",
+  "quoteAmount": 60000,
+  "milestone": "测试",
+  "remark": "updated",
+  "contractAttachmentIds": [],
+  "requirementAttachmentIds": [],
+  "paymentLines": [{ "termName": "预付款", "settlementMethod": "prepay", "paymentRatio": 100, "node": "签约后", "remark": "" }],
+  "productLines": [{ "productId": 1, "productName": "金蝶云·星空", "categoryLabel": "主产品", "version": "旗舰版", "quantity": 1, "amountWithTax": 60000 }]
+}

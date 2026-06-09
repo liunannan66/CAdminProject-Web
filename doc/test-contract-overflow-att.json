@@ -1,0 +1,13 @@
+{
+  "contractNo": "HT-OVERFLOW-TEST",
+  "customerName": "test",
+  "signDate": "2026-06-05",
+  "contractType": "self",
+  "deliveryDate": "2026-06-05",
+  "salesOwner": "test",
+  "quoteAmount": 1,
+  "contractAttachmentIds": [1780634434546],
+  "requirementAttachmentIds": [1780634440828],
+  "paymentLines": [{ "termName": "a", "settlementMethod": "prepay", "paymentRatio": 1, "node": "b" }],
+  "productLines": [{ "productId": 2, "quantity": 1, "amountWithTax": 1 }]
+}
