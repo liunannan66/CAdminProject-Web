@@ -1,3 +1,4 @@
+import type { ContractAttachmentDto } from './contract';
 import { downloadBlobFile } from './file';
 import { request } from '../request';
 
@@ -77,6 +78,22 @@ export interface ProjectInitGoLiveSupportLineDto {
   completionCriteria?: string;
 }
 
+export interface ProjectInitImplementationStrategyLineDto {
+  id: number;
+  seq: number;
+  businessSegment: string;
+  orgScope: string;
+  subBranches: string;
+  phaseStrategy: string;
+  pilot: boolean;
+  promotion: boolean;
+  promotionResponsible: string;
+  locationCentralized: boolean;
+  locationDecentralized: boolean;
+  locationRemoteCentralized: boolean;
+  locationRemoteDecentralized: boolean;
+}
+
 export interface ProjectInitDto {
   id: number;
   projectNo: string;
@@ -95,6 +112,10 @@ export interface ProjectInitDto {
   customDevelopmentScope?: string;
   contractAttachmentNames: string[];
   requirementAttachmentNames: string[];
+  sowReferenceAttachmentNames: string[];
+  sowReferenceAttachments?: ContractAttachmentDto[];
+  orgStructureAttachmentNames: string[];
+  orgStructureAttachments?: ContractAttachmentDto[];
   contractType: string;
   signDate: string;
   contactPerson?: string;
@@ -113,6 +134,7 @@ export interface ProjectInitDto {
   dataConversionLines: ProjectInitDataConversionLineDto[];
   trainingLines: ProjectInitTrainingLineDto[];
   goLiveSupportLines: ProjectInitGoLiveSupportLineDto[];
+  implementationStrategyLines: ProjectInitImplementationStrategyLineDto[];
   createTime?: string;
   creator?: string;
 }
@@ -142,6 +164,10 @@ export interface ProjectInitSaveDto {
   customDevelopmentScope?: string;
   contractAttachmentNames?: string[];
   requirementAttachmentNames?: string[];
+  sowReferenceAttachmentNames?: string[];
+  sowReferenceAttachmentIds?: number[];
+  orgStructureAttachmentNames?: string[];
+  orgStructureAttachmentIds?: number[];
   contractType: string;
   signDate: string;
   contactPerson?: string;
@@ -211,6 +237,21 @@ export interface ProjectInitSaveDto {
     seq: number;
     supportContent: string;
     completionCriteria?: string;
+  }>;
+  implementationStrategyLines: Array<{
+    id?: number;
+    seq: number;
+    businessSegment: string;
+    orgScope: string;
+    subBranches: string;
+    phaseStrategy: string;
+    pilot: boolean;
+    promotion: boolean;
+    promotionResponsible: string;
+    locationCentralized: boolean;
+    locationDecentralized: boolean;
+    locationRemoteCentralized: boolean;
+    locationRemoteDecentralized: boolean;
   }>;
 }
 

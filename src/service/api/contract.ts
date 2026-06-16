@@ -35,6 +35,8 @@ export interface ContractAttachmentDto {
   fileName: string;
   fileSize: number;
   contentType?: string;
+  /** 相对 wwwroot 路径，用于图片预览 */
+  storedPath?: string;
 }
 
 /** 后端合同记录 */

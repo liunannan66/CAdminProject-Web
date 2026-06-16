@@ -9,6 +9,16 @@ export interface FileUploadResult {
   fileName: string;
   fileSize: number;
   contentType?: string;
+  /** 相对 wwwroot 路径，如 uploads/202606/xxx.png */
+  storedPath?: string;
+}
+
+/** 将上传结果转为可在 img 标签中展示的静态资源地址 */
+export function resolveStaticFileUrl(storedPath: string) {
+  const apiBase = resolveServiceUrl(import.meta.env, '');
+  const origin = apiBase.replace(/\/api\/?$/, '');
+  const normalizedPath = storedPath.replace(/^\//, '');
+  return `${origin}/${normalizedPath}`;
 }
 
 /** 上传文件 */

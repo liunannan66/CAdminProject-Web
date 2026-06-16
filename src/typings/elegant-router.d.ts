@@ -36,6 +36,7 @@ declare module "@elegant-router/types" {
     "contract": "/contract";
     "contract_manage": "/contract/manage";
     "contract_project-init": "/contract/project-init";
+    "contract_project-task": "/contract/project-task";
     "function": "/function";
     "function_hide-child": "/function/hide-child";
     "function_hide-child_one": "/function/hide-child/one";
@@ -54,6 +55,8 @@ declare module "@elegant-router/types" {
     "manage_role": "/manage/role";
     "manage_user": "/manage/user";
     "manage_user-detail": "/manage/user-detail/:id";
+    "mobile": "/mobile";
+    "mobile_task": "/mobile/task";
     "multi-menu": "/multi-menu";
     "multi-menu_first": "/multi-menu/first";
     "multi-menu_first_child": "/multi-menu/first/child";
@@ -141,6 +144,7 @@ declare module "@elegant-router/types" {
     | "iframe-page"
     | "login"
     | "manage"
+    | "mobile"
     | "multi-menu"
     | "plugin"
     | "syslog"
@@ -177,6 +181,7 @@ declare module "@elegant-router/types" {
     | "basedata_quoter"
     | "contract_manage"
     | "contract_project-init"
+    | "contract_project-task"
     | "function_hide-child_one"
     | "function_hide-child_three"
     | "function_hide-child_two"
@@ -190,6 +195,7 @@ declare module "@elegant-router/types" {
     | "manage_role"
     | "manage_user-detail"
     | "manage_user"
+    | "mobile_task"
     | "multi-menu_first_child"
     | "multi-menu_second_child_home"
     | "plugin_barcode"

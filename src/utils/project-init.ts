@@ -61,6 +61,23 @@ export interface ProjectGoLiveSupportLine {
   completionCriteria: string;
 }
 
+/** 实施策略行（对应 SOW 4.1） */
+export interface ProjectImplementationStrategyLine {
+  id: string;
+  seq: number;
+  businessSegment: string;
+  orgScope: string;
+  subBranches: string;
+  phaseStrategy: string;
+  pilot: boolean;
+  promotion: boolean;
+  promotionResponsible: string;
+  locationCentralized: boolean;
+  locationDecentralized: boolean;
+  locationRemoteCentralized: boolean;
+  locationRemoteDecentralized: boolean;
+}
+
 /** 项目立项记录 */
 export interface ProjectInitRecord {
   id: number;
@@ -78,6 +95,7 @@ export interface ProjectInitRecord {
   objective: string;
   milestone: string;
   customDevelopmentScope: string;
+  implementationStrategyLines: ProjectImplementationStrategyLine[];
   attachmentNames: string[];
   contractType: ContractType;
   signDate: string;
@@ -99,8 +117,17 @@ export interface ProjectInitRecord {
   /** 合同价税合计(元)，对应合同 quoteAmount，由合同带入，不在组织范围页签维护 */
   contractQuoteAmount: number;
   requirementAttachmentNames: string[];
+  sowReferenceAttachmentNames: string[];
+  sowReferenceAttachments?: import('@/service/api/contract').ContractAttachmentDto[];
+  orgStructureAttachmentNames: string[];
+  orgStructureAttachments?: import('@/service/api/contract').ContractAttachmentDto[];
   createTime?: string;
   creator?: string;
+}
+
+/** 页签角标：与合同详情一致，如「付款条件[3]」 */
+export function formatTabLabel(title: string, count: number) {
+  return `${title}[${count}]`;
 }
 
 function newLineId() {
@@ -168,6 +195,24 @@ export function createEmptyTrainingLine(): ProjectTrainingLine {
   };
 }
 
+export function createEmptyImplementationStrategyLine(seq = 1, orgScope = ''): ProjectImplementationStrategyLine {
+  return {
+    id: newLineId(),
+    seq,
+    businessSegment: '',
+    orgScope,
+    subBranches: '',
+    phaseStrategy: '',
+    pilot: false,
+    promotion: false,
+    promotionResponsible: '',
+    locationCentralized: false,
+    locationDecentralized: false,
+    locationRemoteCentralized: false,
+    locationRemoteDecentralized: false
+  };
+}
+
 export function createEmptyGoLiveSupportLine(seq = 1): ProjectGoLiveSupportLine {
   return {
     id: newLineId(),
@@ -198,6 +243,9 @@ export function buildProjectInitFromContract(contract: ContractRecord): ProjectI
     objective: contract.remark,
     milestone: contract.milestone ?? '',
     customDevelopmentScope: '',
+    implementationStrategyLines: [
+      createEmptyImplementationStrategyLine(1, contract.customerName)
+    ],
     attachmentNames: [...contract.contractAttachmentNames],
     contractType: contract.contractType,
     signDate: contract.signDate,
@@ -223,6 +271,10 @@ export function buildProjectInitFromContract(contract: ContractRecord): ProjectI
     goLiveSupportLines: [createEmptyGoLiveSupportLine(1)],
     contractQuoteAmount: contract.quoteAmount ?? 0,
     requirementAttachmentNames: [...contract.requirementAttachmentNames],
+    sowReferenceAttachmentNames: [],
+    sowReferenceAttachments: [],
+    orgStructureAttachmentNames: [],
+    orgStructureAttachments: [],
     createTime,
     creator: '当前用户'
   };

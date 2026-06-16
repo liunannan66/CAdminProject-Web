@@ -1,7 +1,15 @@
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from 'vue';
-import type { FormInstance, FormRules } from 'element-plus';
+import type { FormInstance, FormRules, UploadFile, UploadUserFile } from 'element-plus';
+import type { UploadRawFile } from 'element-plus';
 import { ElMessage } from 'element-plus';
+import type { ContractAttachmentDto } from '@/service/api/contract';
+import {
+  deleteFile,
+  resolveStaticFileUrl,
+  uploadFile as uploadFileApi,
+  type FileUploadResult
+} from '@/service/api/file';
 import {
   CONTRACT_SALES_OWNER_OPTIONS,
   CONTRACT_TYPE_OPTIONS,
@@ -15,13 +23,16 @@ import { mapProjectInitRecordToSave } from '@/utils/project-init-map';
 import {
   createEmptyDataConversionLine,
   createEmptyGoLiveSupportLine,
+  createEmptyImplementationStrategyLine,
   createEmptyImplementationLine,
   createEmptyIntegrationLine,
   createEmptyOrgScopeLine,
   createEmptyTrainingLine,
+  formatTabLabel,
   type ProjectInitRecord,
   type ProjectDataConversionLine,
   type ProjectGoLiveSupportLine,
+  type ProjectImplementationStrategyLine,
   type ProjectImplementationLine,
   type ProjectIntegrationLine,
   type ProjectOrgScopeLine,
@@ -56,6 +67,7 @@ const integrationLines = ref<ProjectIntegrationLine[]>([]);
 const dataConversionLines = ref<ProjectDataConversionLine[]>([]);
 const trainingLines = ref<ProjectTrainingLine[]>([]);
 const goLiveSupportLines = ref<ProjectGoLiveSupportLine[]>([]);
+const implementationStrategyLines = ref<ProjectImplementationStrategyLine[]>([]);
 
 const formModel = reactive({
   projectNo: '',
@@ -89,6 +101,10 @@ function formatAmount(amount: number) {
 
 const attachmentNames = ref<string[]>([]);
 const requirementAttachmentNames = ref<string[]>([]);
+const sowReferenceUploadList = ref<UploadUserFile[]>([]);
+const sowReferenceAttachments = ref<ContractAttachmentDto[]>([]);
+const orgStructureUploadList = ref<UploadUserFile[]>([]);
+const orgStructureAttachments = ref<ContractAttachmentDto[]>([]);
 
 const rules: FormRules = {
   projectName: [{ required: true, message: '请输入项目名称', trigger: 'blur' }],
@@ -99,6 +115,19 @@ const rules: FormRules = {
 };
 
 const isEdit = computed(() => Boolean(props.record?.id));
+
+const paymentCount = computed(() => paymentLines.value.length);
+const productCount = computed(() => productLines.value.length);
+const implementationCount = computed(() => implementationLines.value.length);
+const orgScopeCount = computed(() => orgScopeLines.value.length);
+const dataConversionCount = computed(() => dataConversionLines.value.length);
+const trainingCount = computed(() => trainingLines.value.length);
+const integrationCount = computed(() => integrationLines.value.length);
+const goLiveSupportCount = computed(() => goLiveSupportLines.value.length);
+const implementationStrategyCount = computed(() => implementationStrategyLines.value.length);
+const sowReferenceCount = computed(() => sowReferenceUploadList.value.length);
+const orgStructureCount = computed(() => orgStructureUploadList.value.length);
+const requirementCount = computed(() => requirementAttachmentNames.value.length);
 
 function resetForm() {
   formModel.projectNo = '';
@@ -126,6 +155,10 @@ function resetForm() {
   formModel.contractQuoteAmount = 0;
   attachmentNames.value = [];
   requirementAttachmentNames.value = [];
+  sowReferenceUploadList.value = [];
+  sowReferenceAttachments.value = [];
+  orgStructureUploadList.value = [];
+  orgStructureAttachments.value = [];
   paymentLines.value = [];
   productLines.value = [];
   implementationLines.value = [createEmptyImplementationLine()];
@@ -134,6 +167,7 @@ function resetForm() {
   dataConversionLines.value = [createEmptyDataConversionLine(1)];
   trainingLines.value = [createEmptyTrainingLine()];
   goLiveSupportLines.value = [createEmptyGoLiveSupportLine(1)];
+  implementationStrategyLines.value = [createEmptyImplementationStrategyLine(1)];
   activeTab.value = 'basic';
   formRef.value?.clearValidate();
 }
@@ -164,6 +198,10 @@ function fillForm(record: ProjectInitRecord) {
   formModel.contractQuoteAmount = record.contractQuoteAmount ?? 0;
   attachmentNames.value = [...record.attachmentNames];
   requirementAttachmentNames.value = [...record.requirementAttachmentNames];
+  sowReferenceAttachments.value = [...(record.sowReferenceAttachments ?? [])];
+  sowReferenceUploadList.value = mapAttachmentsToUploadList(record.sowReferenceAttachments);
+  orgStructureAttachments.value = [...(record.orgStructureAttachments ?? [])];
+  orgStructureUploadList.value = mapImageAttachmentsToUploadList(record.orgStructureAttachments);
   paymentLines.value = record.paymentLines.map(item => ({ ...item }));
   productLines.value = record.productLines.map(item => ({ ...item }));
   implementationLines.value = record.implementationLines.length
@@ -184,6 +222,9 @@ function fillForm(record: ProjectInitRecord) {
   goLiveSupportLines.value = record.goLiveSupportLines?.length
     ? record.goLiveSupportLines.map(item => ({ ...item }))
     : [createEmptyGoLiveSupportLine(1)];
+  implementationStrategyLines.value = record.implementationStrategyLines?.length
+    ? record.implementationStrategyLines.map(item => ({ ...item }))
+    : [createEmptyImplementationStrategyLine(1, record.customerName || record.partyA)];
 }
 
 watch(
@@ -288,6 +329,231 @@ function removeGoLiveSupportLine(id: string) {
   goLiveSupportLines.value = goLiveSupportLines.value.filter(item => item.id !== id);
 }
 
+function addImplementationStrategyLine() {
+  implementationStrategyLines.value.push(
+    createEmptyImplementationStrategyLine(
+      implementationStrategyLines.value.length + 1,
+      formModel.customerName || formModel.partyA
+    )
+  );
+}
+
+function removeImplementationStrategyLine(id: string) {
+  if (implementationStrategyLines.value.length <= 1) {
+    ElMessage.warning('至少保留一条实施策略');
+    return;
+  }
+  implementationStrategyLines.value = implementationStrategyLines.value.filter(item => item.id !== id);
+}
+
+const MAX_ATTACHMENT_ID = 2147483647;
+
+function mapAttachmentsToUploadList(attachments?: ContractAttachmentDto[]) {
+  return (attachments ?? [])
+    .filter(item => item.id > 0)
+    .map(item => ({
+      name: item.fileName,
+      uid: item.id,
+      status: 'success' as const,
+      response: {
+        id: item.id,
+        fileName: item.fileName,
+        fileSize: item.fileSize,
+        storedPath: item.storedPath
+      }
+    }));
+}
+
+function mapImageAttachmentsToUploadList(attachments?: ContractAttachmentDto[]) {
+  return (attachments ?? [])
+    .filter(item => item.id > 0)
+    .map(item => ({
+      name: item.fileName,
+      uid: item.id,
+      status: 'success' as const,
+      url: item.storedPath ? resolveStaticFileUrl(item.storedPath) : undefined,
+      response: {
+        id: item.id,
+        fileName: item.fileName,
+        fileSize: item.fileSize,
+        storedPath: item.storedPath,
+        contentType: item.contentType
+      }
+    }));
+}
+
+function parseUploadResponse(response: unknown): FileUploadResult | null {
+  if (!response || typeof response !== 'object') return null;
+  const root = response as Record<string, unknown>;
+  const payload = (root.body && typeof root.body === 'object' ? root.body : root) as Record<string, unknown>;
+  const id = Number(payload.id ?? payload.Id);
+  if (!Number.isFinite(id) || id <= 0 || id > MAX_ATTACHMENT_ID) return null;
+  const storedPath = String(payload.storedPath ?? payload.StoredPath ?? '');
+  return {
+    id,
+    fileName: String(payload.fileName ?? payload.FileName ?? ''),
+    fileSize: Number(payload.fileSize ?? payload.FileSize ?? 0),
+    contentType: (payload.contentType ?? payload.ContentType) as string | undefined,
+    storedPath: storedPath || undefined
+  };
+}
+
+function resolveUploadAttachmentId(file: UploadUserFile): number | null {
+  const parsed = parseUploadResponse(file.response);
+  if (parsed) return parsed.id;
+  if (typeof file.uid === 'number' && file.uid > 0 && file.uid <= MAX_ATTACHMENT_ID) return file.uid;
+  if (typeof file.uid === 'string' && /^\d+$/.test(file.uid)) {
+    const uidNum = Number(file.uid);
+    if (uidNum > 0 && uidNum <= MAX_ATTACHMENT_ID) return uidNum;
+  }
+  return null;
+}
+
+function hasInvalidAttachmentIds(fileList: UploadUserFile[]) {
+  return fileList.some(file => {
+    if (file.status === 'uploading' || file.status === 'ready') return false;
+    if (file.status === 'fail') return true;
+    return !resolveUploadAttachmentId(file);
+  });
+}
+
+function isUploadFinished(file: UploadUserFile) {
+  if (file.status === 'success') return true;
+  if (file.status === 'fail') return false;
+  return resolveUploadAttachmentId(file) != null;
+}
+
+function hasPendingUploads(fileList: UploadUserFile[]) {
+  return fileList.some(file => {
+    if (isUploadFinished(file)) return false;
+    return file.status === 'uploading' || file.status === 'ready';
+  });
+}
+
+function hasFailedUploads(fileList: UploadUserFile[]) {
+  return fileList.some(file => file.status === 'fail');
+}
+
+function collectAttachmentsFromUploadList(fileList: UploadUserFile[]): ContractAttachmentDto[] {
+  return fileList
+    .map(file => {
+      const parsed = parseUploadResponse(file.response);
+      const id = parsed?.id ?? resolveUploadAttachmentId(file);
+      if (!id) return null;
+      return {
+        id,
+        fileName: parsed?.fileName || file.name,
+        fileSize: parsed?.fileSize ?? 0,
+        contentType: parsed?.contentType,
+        storedPath: parsed?.storedPath
+      };
+    })
+    .filter((item): item is ContractAttachmentDto => item !== null);
+}
+
+function resolveUploadErrorMessage(error: unknown) {
+  const err = error as { response?: { data?: { message?: string; body?: string } }; message?: string };
+  return err.response?.data?.message || (typeof err.response?.data?.body === 'string' ? err.response.data.body : '') || err.message || '上传失败';
+}
+
+async function handleSowReferenceAttachmentChange(uploadFileItem: UploadFile) {
+  if (uploadFileItem.status !== 'ready' || !uploadFileItem.raw) return;
+
+  uploadFileItem.status = 'uploading';
+  uploadFileItem.percentage = 30;
+
+  try {
+    const rawFile = uploadFileItem.raw instanceof File ? uploadFileItem.raw : (uploadFileItem.raw as UploadRawFile);
+    const result = await uploadFileApi(rawFile, 'project_init_sow_ref');
+    const parsed = parseUploadResponse(result);
+    if (!parsed) {
+      throw new Error('上传响应无效，未获取到附件编号');
+    }
+    uploadFileItem.status = 'success';
+    uploadFileItem.response = parsed;
+    uploadFileItem.uid = parsed.id;
+    uploadFileItem.name = parsed.fileName || uploadFileItem.name;
+    uploadFileItem.percentage = 100;
+  } catch (error) {
+    uploadFileItem.status = 'fail';
+    ElMessage.error(resolveUploadErrorMessage(error));
+    sowReferenceUploadList.value = sowReferenceUploadList.value.filter(item => item.uid !== uploadFileItem.uid);
+  }
+}
+
+const IMAGE_FILE_PATTERN = /\.(png|jpe?g|gif|webp|bmp)$/i;
+
+function isImageFile(file: File | UploadRawFile) {
+  if (file.type?.startsWith('image/')) return true;
+  return IMAGE_FILE_PATTERN.test(file.name);
+}
+
+async function handleOrgStructureAttachmentChange(uploadFileItem: UploadFile) {
+  if (uploadFileItem.status !== 'ready' || !uploadFileItem.raw) return;
+
+  const rawFile = uploadFileItem.raw instanceof File ? uploadFileItem.raw : (uploadFileItem.raw as UploadRawFile);
+  if (!isImageFile(rawFile)) {
+    ElMessage.warning('仅支持上传图片（png/jpg/jpeg/gif/webp/bmp）');
+    orgStructureUploadList.value = orgStructureUploadList.value.filter(item => item.uid !== uploadFileItem.uid);
+    return;
+  }
+
+  uploadFileItem.status = 'uploading';
+  uploadFileItem.percentage = 30;
+
+  try {
+    const result = await uploadFileApi(rawFile, 'project_init_org_structure');
+    const parsed = parseUploadResponse(result);
+    if (!parsed) {
+      throw new Error('上传响应无效，未获取到附件编号');
+    }
+    uploadFileItem.status = 'success';
+    uploadFileItem.response = parsed;
+    uploadFileItem.uid = parsed.id;
+    uploadFileItem.name = parsed.fileName || uploadFileItem.name;
+    uploadFileItem.percentage = 100;
+    uploadFileItem.url = parsed.storedPath ? resolveStaticFileUrl(parsed.storedPath) : undefined;
+  } catch (error) {
+    uploadFileItem.status = 'fail';
+    ElMessage.error(resolveUploadErrorMessage(error));
+    orgStructureUploadList.value = orgStructureUploadList.value.filter(item => item.uid !== uploadFileItem.uid);
+  }
+}
+
+async function handleOrgStructureUploadRemove(file: UploadUserFile) {
+  const id = resolveUploadAttachmentId(file);
+  if (!id) return true;
+
+  if (props.record?.orgStructureAttachments?.some(item => item.id === id)) {
+    return true;
+  }
+
+  try {
+    await deleteFile(id);
+    return true;
+  } catch {
+    ElMessage.warning('删除图片失败');
+    return false;
+  }
+}
+
+async function handleSowReferenceUploadRemove(file: UploadUserFile) {
+  const id = resolveUploadAttachmentId(file);
+  if (!id) return true;
+
+  if (props.record?.sowReferenceAttachments?.some(item => item.id === id)) {
+    return true;
+  }
+
+  try {
+    await deleteFile(id);
+    return true;
+  } catch {
+    ElMessage.warning('删除附件失败');
+    return false;
+  }
+}
+
 function buildPayload(): ProjectInitRecord {
   const base = props.record;
   return {
@@ -324,8 +590,13 @@ function buildPayload(): ProjectInitRecord {
     dataConversionLines: dataConversionLines.value.map((item, index) => ({ ...item, seq: index + 1 })),
     trainingLines: trainingLines.value.map(item => ({ ...item })),
     goLiveSupportLines: goLiveSupportLines.value.map((item, index) => ({ ...item, seq: index + 1 })),
+    implementationStrategyLines: implementationStrategyLines.value.map((item, index) => ({ ...item, seq: index + 1 })),
     contractQuoteAmount: formModel.contractQuoteAmount,
     requirementAttachmentNames: [...requirementAttachmentNames.value],
+    sowReferenceAttachments: collectAttachmentsFromUploadList(sowReferenceUploadList.value),
+    sowReferenceAttachmentNames: collectAttachmentsFromUploadList(sowReferenceUploadList.value).map(item => item.fileName),
+    orgStructureAttachments: collectAttachmentsFromUploadList(orgStructureUploadList.value),
+    orgStructureAttachmentNames: collectAttachmentsFromUploadList(orgStructureUploadList.value).map(item => item.fileName),
     createTime: base?.createTime,
     creator: base?.creator
   };
@@ -337,6 +608,36 @@ async function handleSave() {
     await formRef.value.validate();
   } catch {
     activeTab.value = 'basic';
+    return;
+  }
+  if (hasPendingUploads(sowReferenceUploadList.value)) {
+    ElMessage.warning('参考文档正在上传，请稍候再保存');
+    activeTab.value = 'sowReference';
+    return;
+  }
+  if (hasFailedUploads(sowReferenceUploadList.value)) {
+    ElMessage.warning('存在上传失败的参考文档，请移除后重新上传');
+    activeTab.value = 'sowReference';
+    return;
+  }
+  if (hasInvalidAttachmentIds(sowReferenceUploadList.value)) {
+    ElMessage.warning('参考文档未获取到有效编号，请移除后重新上传');
+    activeTab.value = 'sowReference';
+    return;
+  }
+  if (hasPendingUploads(orgStructureUploadList.value)) {
+    ElMessage.warning('组织架构图片正在上传，请稍候再保存');
+    activeTab.value = 'orgStructure';
+    return;
+  }
+  if (hasFailedUploads(orgStructureUploadList.value)) {
+    ElMessage.warning('存在上传失败的组织架构图片，请移除后重新上传');
+    activeTab.value = 'orgStructure';
+    return;
+  }
+  if (hasInvalidAttachmentIds(orgStructureUploadList.value)) {
+    ElMessage.warning('组织架构图片未获取到有效编号，请移除后重新上传');
+    activeTab.value = 'orgStructure';
     return;
   }
   const payload = mapProjectInitRecordToSave(buildPayload());
@@ -360,7 +661,7 @@ async function handleSave() {
 <template>
   <ElDrawer v-model="visible" :title="title" size="100%" append-to-body destroy-on-close class="project-init-drawer">
     <ElTabs v-model="activeTab" class="project-init-tabs">
-      <ElTabPane label="基本信息" name="basic">
+      <ElTabPane lazy label="基本信息" name="basic">
         <ElForm ref="formRef" :model="formModel" :rules="rules" label-width="120px" class="pr-16px">
           <ElRow :gutter="16">
             <ElCol :lg="8" :md="12" :sm="24">
@@ -449,7 +750,7 @@ async function handleSave() {
         </ElForm>
       </ElTabPane>
 
-      <ElTabPane label="里程碑" name="milestone">
+      <ElTabPane lazy label="里程碑" name="milestone">
         <ElForm :model="formModel" label-width="120px" class="pr-16px">
           <ElFormItem label="里程碑">
             <ElInput
@@ -462,7 +763,85 @@ async function handleSave() {
         </ElForm>
       </ElTabPane>
 
-      <ElTabPane label="签约信息" name="sign">
+      <ElTabPane lazy :label="formatTabLabel('实施策略', implementationStrategyCount)" name="implementationStrategy">
+        <p class="implementation-strategy-tip">本项目整体实施策略如下：</p>
+        <div class="mb-12px flex justify-end">
+          <ElButton type="primary" plain @click="addImplementationStrategyLine">新增实施策略</ElButton>
+        </div>
+        <ElTable border :data="implementationStrategyLines" row-key="id" max-height="480">
+          <ElTableColumn label="序号" width="70" align="center">
+            <template #default="{ $index }">
+              {{ $index + 1 }}
+            </template>
+          </ElTableColumn>
+          <ElTableColumn label="业务板块" min-width="130">
+            <template #default="{ row }">
+              <ElInput v-model="row.businessSegment" placeholder="如：财务+供应链" />
+            </template>
+          </ElTableColumn>
+          <ElTableColumn label="组织范围" min-width="150">
+            <template #default="{ row }">
+              <ElInput v-model="row.orgScope" placeholder="组织范围" />
+            </template>
+          </ElTableColumn>
+          <ElTableColumn label="下属分支机构" min-width="130">
+            <template #default="{ row }">
+              <ElInput v-model="row.subBranches" placeholder="如：4家组织" />
+            </template>
+          </ElTableColumn>
+          <ElTableColumn label="分期策略" width="110">
+            <template #default="{ row }">
+              <ElInput v-model="row.phaseStrategy" placeholder="如：一期" />
+            </template>
+          </ElTableColumn>
+          <ElTableColumn label="推广策略" align="center">
+            <ElTableColumn label="试点" width="70" align="center">
+              <template #default="{ row }">
+                <ElCheckbox v-model="row.pilot" />
+              </template>
+            </ElTableColumn>
+            <ElTableColumn label="推广" width="70" align="center">
+              <template #default="{ row }">
+                <ElCheckbox v-model="row.promotion" />
+              </template>
+            </ElTableColumn>
+            <ElTableColumn label="推广责任方" min-width="120">
+              <template #default="{ row }">
+                <ElInput v-model="row.promotionResponsible" placeholder="如：甲、乙方" />
+              </template>
+            </ElTableColumn>
+          </ElTableColumn>
+          <ElTableColumn label="实施地点" align="center">
+            <ElTableColumn label="集中" width="70" align="center">
+              <template #default="{ row }">
+                <ElCheckbox v-model="row.locationCentralized" />
+              </template>
+            </ElTableColumn>
+            <ElTableColumn label="分散" width="70" align="center">
+              <template #default="{ row }">
+                <ElCheckbox v-model="row.locationDecentralized" />
+              </template>
+            </ElTableColumn>
+            <ElTableColumn label="异地集中" width="90" align="center">
+              <template #default="{ row }">
+                <ElCheckbox v-model="row.locationRemoteCentralized" />
+              </template>
+            </ElTableColumn>
+            <ElTableColumn label="异地分散" width="90" align="center">
+              <template #default="{ row }">
+                <ElCheckbox v-model="row.locationRemoteDecentralized" />
+              </template>
+            </ElTableColumn>
+          </ElTableColumn>
+          <ElTableColumn label="操作" width="80" align="center" fixed="right">
+            <template #default="{ row }">
+              <ElButton type="danger" link @click="removeImplementationStrategyLine(row.id)">删除</ElButton>
+            </template>
+          </ElTableColumn>
+        </ElTable>
+      </ElTabPane>
+
+      <ElTabPane lazy label="签约信息" name="sign">
         <ElForm :model="formModel" label-width="120px" class="pr-16px">
           <ElRow :gutter="16">
             <ElCol :lg="8" :md="12" :sm="24">
@@ -523,7 +902,7 @@ async function handleSave() {
         </ElForm>
       </ElTabPane>
 
-      <ElTabPane label="付款条件" name="payment">
+      <ElTabPane lazy :label="formatTabLabel('付款条件', paymentCount)" name="payment">
         <ElTable border :data="paymentLines" row-key="id" max-height="420">
           <ElTableColumn prop="termName" label="条件名称" min-width="140" show-overflow-tooltip />
           <ElTableColumn label="结算方式" width="110" align="center">
@@ -542,7 +921,7 @@ async function handleSave() {
         <p v-if="!paymentLines.length" class="empty-tip">暂无付款条件（来自合同自动带入）</p>
       </ElTabPane>
 
-      <ElTabPane label="产品范围" name="products">
+      <ElTabPane lazy :label="formatTabLabel('产品范围', productCount)" name="products">
         <ElTable border :data="productLines" row-key="id" max-height="420">
           <ElTableColumn label="产品名称" min-width="180">
             <template #default="{ row }">
@@ -569,7 +948,7 @@ async function handleSave() {
         </ElTable>
       </ElTabPane>
 
-      <ElTabPane label="实施功能范围" name="implementation">
+      <ElTabPane lazy :label="formatTabLabel('实施功能范围', implementationCount)" name="implementation">
         <div class="mb-12px flex justify-end">
           <ElButton type="primary" plain @click="addImplementationLine">新增实施功能范围</ElButton>
         </div>
@@ -602,7 +981,7 @@ async function handleSave() {
         </ElTable>
       </ElTabPane>
 
-      <ElTabPane label="定制化开发范围" name="customDevelopment">
+      <ElTabPane lazy label="定制化开发范围" name="customDevelopment">
         <ElForm :model="formModel" label-width="120px" class="pr-16px">
           <ElFormItem label="定制化开发范围">
             <ElInput
@@ -615,7 +994,7 @@ async function handleSave() {
         </ElForm>
       </ElTabPane>
 
-      <ElTabPane label="项目组织范围" name="org">
+      <ElTabPane lazy :label="formatTabLabel('项目组织范围', orgScopeCount)" name="org">
         <div class="mb-12px flex justify-end">
           <ElButton type="primary" plain @click="addOrgScopeLine">新增组织</ElButton>
         </div>
@@ -644,7 +1023,27 @@ async function handleSave() {
         </ElTable>
       </ElTabPane>
 
-      <ElTabPane label="初始数据转换范围" name="dataConversion">
+      <ElTabPane lazy :label="formatTabLabel('项目组织架构', orgStructureCount)" name="orgStructure">
+        <p class="org-structure-tip">上传项目组织架构图，支持多张图片，点击缩略图可预览。</p>
+        <ElUpload
+          v-model:file-list="orgStructureUploadList"
+          action="#"
+          list-type="picture-card"
+          accept="image/png,image/jpeg,image/jpg,image/gif,image/webp,image/bmp"
+          :auto-upload="false"
+          :on-change="handleOrgStructureAttachmentChange"
+          :before-remove="handleOrgStructureUploadRemove"
+          multiple
+          class="org-structure-upload"
+        >
+          <span class="text-24px">+</span>
+          <template #tip>
+            <div class="text-12px text-gray-500">支持 png/jpg/jpeg/gif/webp/bmp，单张最大 100MB</div>
+          </template>
+        </ElUpload>
+      </ElTabPane>
+
+      <ElTabPane lazy :label="formatTabLabel('初始数据转换范围', dataConversionCount)" name="dataConversion">
         <div class="mb-12px flex justify-end">
           <ElButton type="primary" plain @click="addDataConversionLine">新增数据项</ElButton>
         </div>
@@ -672,7 +1071,7 @@ async function handleSave() {
         </ElTable>
       </ElTabPane>
 
-      <ElTabPane label="培训服务" name="training">
+      <ElTabPane lazy :label="formatTabLabel('培训服务', trainingCount)" name="training">
         <div class="mb-12px flex justify-end">
           <ElButton type="primary" plain @click="addTrainingLine">新增培训项</ElButton>
         </div>
@@ -710,7 +1109,7 @@ async function handleSave() {
         </ElTable>
       </ElTabPane>
 
-      <ElTabPane label="系统集成范围" name="integration">
+      <ElTabPane lazy :label="formatTabLabel('系统集成范围', integrationCount)" name="integration">
         <div class="mb-12px flex justify-end">
           <ElButton type="primary" plain @click="addIntegrationLine">新增集成项</ElButton>
         </div>
@@ -753,7 +1152,7 @@ async function handleSave() {
         </ElTable>
       </ElTabPane>
 
-      <ElTabPane label="上线支持" name="goLiveSupport">
+      <ElTabPane lazy :label="formatTabLabel('上线支持', goLiveSupportCount)" name="goLiveSupport">
         <div class="mb-12px flex justify-end">
           <ElButton type="primary" plain @click="addGoLiveSupportLine">新增上线支持</ElButton>
         </div>
@@ -781,7 +1180,24 @@ async function handleSave() {
         </ElTable>
       </ElTabPane>
 
-      <ElTabPane label="项目需求" name="requirements">
+      <ElTabPane lazy :label="formatTabLabel('SOW撰写参考文档', sowReferenceCount)" name="sowReference">
+        <ElUpload
+          v-model:file-list="sowReferenceUploadList"
+          action="#"
+          :auto-upload="false"
+          :on-change="handleSowReferenceAttachmentChange"
+          :before-remove="handleSowReferenceUploadRemove"
+          multiple
+          class="sow-reference-upload"
+        >
+          <ElButton type="primary" plain>选择文件</ElButton>
+          <template #tip>
+            <div class="text-12px text-gray-500">支持上传多个参考文档，pdf/doc/xls/图片等，单文件最大 100MB</div>
+          </template>
+        </ElUpload>
+      </ElTabPane>
+
+      <ElTabPane lazy :label="formatTabLabel('项目需求', requirementCount)" name="requirements">
         <ul v-if="requirementAttachmentNames.length" class="attachment-list">
           <li v-for="name in requirementAttachmentNames" :key="name">{{ name }}</li>
         </ul>
@@ -823,5 +1239,21 @@ async function handleSave() {
   margin: 12px 0 0;
   color: var(--el-text-color-secondary);
   font-size: 13px;
+}
+
+.implementation-strategy-tip {
+  margin: 0 0 12px;
+  color: var(--el-text-color-regular);
+  font-size: 14px;
+}
+
+.org-structure-tip {
+  margin: 0 0 12px;
+  color: var(--el-text-color-regular);
+  font-size: 14px;
+}
+
+.org-structure-upload :deep(.el-upload-list--picture-card .el-upload-list__item) {
+  transition: none;
 }
 </style>

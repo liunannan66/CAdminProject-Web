@@ -171,6 +171,18 @@ export const generatedRoutes: GeneratedRoute[] = [
           order: 2,
           keepAlive: true
         }
+      },
+      {
+        name: 'contract_project-task',
+        path: '/contract/project-task',
+        component: 'view.contract_project-task',
+        meta: {
+          title: 'contract_project-task',
+          i18nKey: 'route.contract_project-task',
+          hideInMenu: true,
+          activeMenu: 'contract_project-init',
+          keepAlive: true
+        }
       }
     ]
   },
@@ -360,6 +372,28 @@ export const generatedRoutes: GeneratedRoute[] = [
           hideInMenu: true,
           roles: ['R_ADMIN'],
           activeMenu: 'manage_user'
+        }
+      }
+    ]
+  },
+  {
+    name: 'mobile',
+    path: '/mobile',
+    component: 'layout.blank',
+    meta: {
+      title: 'mobile',
+      i18nKey: 'route.mobile',
+      hideInMenu: true
+    },
+    children: [
+      {
+        name: 'mobile_task',
+        path: '/mobile/task',
+        component: 'view.mobile_task',
+        meta: {
+          title: 'mobile_task',
+          i18nKey: 'route.mobile_task',
+          hideInMenu: true
         }
       }
     ]

@@ -6,4 +6,9 @@ export const FILE_AUTH = {
 } as const;
 
 /** 上传业务类型 */
-export type FileBizType = 'contract' | 'requirement';
+export type FileBizType =
+  | 'contract'
+  | 'requirement'
+  | 'project_init_sow_ref'
+  | 'project_init_org_structure'
+  | 'richtext';

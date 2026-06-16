@@ -611,12 +611,16 @@ packages:
     peerDependencies:
       '@babel/core': ^7.0.0-0
 
-  '@babel/runtime-corejs3@7.28.3':
-    resolution: {integrity: sha512-LKYxD2CIfocUFNREQ1yk+dW+8OH8CRqmgatBZYXb+XhuObO8wsDpEoCNri5bKld9cnj8xukqZjxSX8p1YiRF8Q==}
+  '@babel/runtime-corejs3@7.29.7':
+    resolution: {integrity: sha512-ppj9ouYku+RX0ljtgZd+KMO5mkM2bCqg8H2PYAFWnLsHEIKIdRojqbJ2i3eVHrisuxy7nOFCmngTDdWtUCdXUQ==}
     engines: {node: '>=6.9.0'}
 
   '@babel/runtime@7.28.3':
     resolution: {integrity: sha512-9uIQ10o0WGdpP6GDhXcdOJPJuDgFtIDtN/9+ArJQ2NAfAmiuhTQdzkaTGR33v43GYS2UrSA0eX2pPPHoFVvpxA==}
+    engines: {node: '>=6.9.0'}
+
+  '@babel/runtime@7.29.7':
+    resolution: {integrity: sha512-Nq8OhGWiZIZGV6hLHoyAKLLcJihP/xFeBMGJoUrxTX2psI8dCifzLhZISFb+VWS3wFMRDmCGw5R+dOySCqPLhw==}
     engines: {node: '>=6.9.0'}
 
   '@babel/template@7.27.2':
@@ -2486,8 +2490,8 @@ packages:
   core-js-compat@3.45.1:
     resolution: {integrity: sha512-tqTt5T4PzsMIZ430XGviK4vzYSoeNJ6CXODi6c/voxOT6IZqBht5/EKaSNnYiEjjRYxjVz7DQIsOsY0XNi8PIA==}
 
-  core-js-pure@3.45.1:
-    resolution: {integrity: sha512-OHnWFKgTUshEU8MK+lOs1H8kC8GkTi9Z1tvNkxrCcw9wl3MJIO7q2ld77wjWn4/xuGrVu2X+nME1iIIPBSdyEQ==}
+  core-js-pure@3.49.0:
+    resolution: {integrity: sha512-XM4RFka59xATyJv/cS3O3Kml72hQXUeGRuuTmMYFxwzc9/7C8OYTaIR/Ji+Yt8DXzsFLNhat15cE/JP15HrCgw==}
 
   core-js@3.45.1:
     resolution: {integrity: sha512-L4NPsJlCfZsPeXukyzHFlg/i7IIVwHSItR0wg0FLNqYClJ4MQYTYLbC7EkjKYRLZF2iof2MUgN0EGy7MdQFChg==}
@@ -5543,7 +5547,7 @@ snapshots:
     dependencies:
       '@antv/g-lite': 2.3.2
       '@antv/util': 3.3.11
-      '@babel/runtime': 7.28.3
+      '@babel/runtime': 7.29.7
       gl-matrix: 3.4.4
       tslib: 2.8.1
 
@@ -5563,14 +5567,14 @@ snapshots:
   '@antv/g-dom-mutation-observer-api@2.0.38':
     dependencies:
       '@antv/g-lite': 2.3.2
-      '@babel/runtime': 7.28.3
+      '@babel/runtime': 7.29.7
 
   '@antv/g-lite@2.3.2':
     dependencies:
       '@antv/g-math': 3.0.1
       '@antv/util': 3.3.11
       '@antv/vendor': 1.0.11
-      '@babel/runtime': 7.28.3
+      '@babel/runtime': 7.29.7
       eventemitter3: 5.0.1
       gl-matrix: 3.4.4
       rbush: 3.0.1
@@ -5579,7 +5583,7 @@ snapshots:
   '@antv/g-math@3.0.1':
     dependencies:
       '@antv/util': 3.3.11
-      '@babel/runtime': 7.28.3
+      '@babel/runtime': 7.29.7
       gl-matrix: 3.4.4
       tslib: 2.8.1
 
@@ -5588,7 +5592,7 @@ snapshots:
       '@antv/g-lite': 2.3.2
       '@antv/g-math': 3.0.1
       '@antv/util': 3.3.11
-      '@babel/runtime': 7.28.3
+      '@babel/runtime': 7.29.7
       tslib: 2.8.1
 
   '@antv/g-plugin-canvas-picker@2.1.27':
@@ -5598,7 +5602,7 @@ snapshots:
       '@antv/g-plugin-canvas-path-generator': 2.1.22
       '@antv/g-plugin-canvas-renderer': 2.3.3
       '@antv/util': 3.3.11
-      '@babel/runtime': 7.28.3
+      '@babel/runtime': 7.29.7
       gl-matrix: 3.4.4
       tslib: 2.8.1
 
@@ -5609,14 +5613,14 @@ snapshots:
       '@antv/g-plugin-canvas-path-generator': 2.1.22
       '@antv/g-plugin-image-loader': 2.1.26
       '@antv/util': 3.3.11
-      '@babel/runtime': 7.28.3
+      '@babel/runtime': 7.29.7
       gl-matrix: 3.4.4
       tslib: 2.8.1
 
   '@antv/g-plugin-dom-interaction@2.1.27':
     dependencies:
       '@antv/g-lite': 2.3.2
-      '@babel/runtime': 7.28.3
+      '@babel/runtime': 7.29.7
       tslib: 2.8.1
 
   '@antv/g-plugin-dragndrop@2.0.38':
@@ -5630,7 +5634,7 @@ snapshots:
     dependencies:
       '@antv/g-lite': 2.3.2
       '@antv/util': 3.3.11
-      '@babel/runtime': 7.28.3
+      '@babel/runtime': 7.29.7
       gl-matrix: 3.4.4
       tslib: 2.8.1
 
@@ -5638,7 +5642,7 @@ snapshots:
     dependencies:
       '@antv/g-lite': 2.3.2
       '@antv/util': 3.3.11
-      '@babel/runtime': 7.28.3
+      '@babel/runtime': 7.29.7
       gl-matrix: 3.4.4
       tslib: 2.8.1
 
@@ -5646,7 +5650,7 @@ snapshots:
     dependencies:
       '@antv/g-lite': 2.3.2
       '@antv/util': 3.3.11
-      '@babel/runtime': 7.28.3
+      '@babel/runtime': 7.29.7
       tslib: 2.8.1
 
   '@antv/g2@5.4.0':
@@ -5946,11 +5950,13 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@babel/runtime-corejs3@7.28.3':
+  '@babel/runtime-corejs3@7.29.7':
     dependencies:
-      core-js-pure: 3.45.1
+      core-js-pure: 3.49.0
 
   '@babel/runtime@7.28.3': {}
+
+  '@babel/runtime@7.29.7': {}
 
   '@babel/template@7.27.2':
     dependencies:
@@ -7961,7 +7967,7 @@ snapshots:
     dependencies:
       browserslist: 4.25.4
 
-  core-js-pure@3.45.1: {}
+  core-js-pure@3.49.0: {}
 
   core-js@3.45.1: {}
 
@@ -10981,8 +10987,8 @@ snapshots:
 
   wangeditor@4.7.15:
     dependencies:
-      '@babel/runtime': 7.28.3
-      '@babel/runtime-corejs3': 7.28.3
+      '@babel/runtime': 7.29.7
+      '@babel/runtime-corejs3': 7.29.7
       tslib: 2.8.1
 
   watchpack@2.5.1:

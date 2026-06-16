@@ -39,4 +39,18 @@ if ($xml -match '\{\{ContractName\}\}|\{\{ContractNo\}\}') {
   throw "Template placeholders were not replaced"
 }
 Write-Host "Placeholder check passed" -ForegroundColor Green
+
+# 实施策略表：若立项含业务板块数据，应出现在生成文档中
+$detailRaw = curl.exe -sk "$baseUrl/api/ProjectInit/Detail/$id" -H "Authorization: Bearer $token"
+$detail = $detailRaw | ConvertFrom-Json
+$firstSegment = $detail.body.implementationStrategyLines[0].businessSegment
+if ($firstSegment) {
+  if ($xml -notmatch [regex]::Escape($firstSegment)) {
+    throw "Implementation strategy table may not be filled. Missing business segment: $firstSegment"
+  }
+  Write-Host "Implementation strategy data check passed: $firstSegment" -ForegroundColor Green
+} else {
+  Write-Host "Skip implementation strategy data check (no lines)" -ForegroundColor Yellow
+}
+
 Write-Host "ALL TESTS PASSED" -ForegroundColor Green

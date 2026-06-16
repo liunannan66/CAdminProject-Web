@@ -24,6 +24,7 @@ BEGIN
     Objective                   NVARCHAR(MAX)      NULL,
     Milestone                   NVARCHAR(MAX)      NULL,
     CustomDevelopmentScope      NVARCHAR(MAX)      NULL,
+    ImplementationStrategy      NVARCHAR(MAX)      NULL,
     ContractType                VARCHAR(20)        NOT NULL,
     SignDate                    DATE               NOT NULL,
     ContactPerson               NVARCHAR(50)       NULL,

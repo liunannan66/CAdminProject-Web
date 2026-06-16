@@ -8,6 +8,7 @@ import type {
   ProjectInitOrgScopeLineDto,
   ProjectInitTrainingLineDto,
   ProjectInitGoLiveSupportLineDto,
+  ProjectInitImplementationStrategyLineDto,
   ProjectInitPaymentLineDto,
   ProjectInitProductLineDto,
   ProjectInitSaveDto
@@ -19,12 +20,18 @@ import type {
   ProjectIntegrationLine,
   ProjectOrgScopeLine,
   ProjectTrainingLine,
-  ProjectGoLiveSupportLine
+  ProjectGoLiveSupportLine,
+  ProjectImplementationStrategyLine
 } from '@/utils/project-init';
+import type { ContractAttachmentDto } from '@/service/api/contract';
 import type {
   ContractPaymentLine,
   ContractProductLine
 } from '@/views/contract/manage/modules/contract-operate-drawer.vue';
+
+function collectAttachmentIds(attachments?: ContractAttachmentDto[]) {
+  return (attachments ?? []).map(item => item.id).filter(id => id > 0);
+}
 
 function newLineId() {
   return `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
@@ -114,6 +121,24 @@ function mapGoLiveSupportLine(dto: ProjectInitGoLiveSupportLineDto): ProjectGoLi
   };
 }
 
+function mapImplementationStrategyLine(dto: ProjectInitImplementationStrategyLineDto): ProjectImplementationStrategyLine {
+  return {
+    id: String(dto.id),
+    seq: dto.seq,
+    businessSegment: dto.businessSegment ?? '',
+    orgScope: dto.orgScope ?? '',
+    subBranches: dto.subBranches ?? '',
+    phaseStrategy: dto.phaseStrategy ?? '',
+    pilot: Boolean(dto.pilot),
+    promotion: Boolean(dto.promotion),
+    promotionResponsible: dto.promotionResponsible ?? '',
+    locationCentralized: Boolean(dto.locationCentralized),
+    locationDecentralized: Boolean(dto.locationDecentralized),
+    locationRemoteCentralized: Boolean(dto.locationRemoteCentralized),
+    locationRemoteDecentralized: Boolean(dto.locationRemoteDecentralized)
+  };
+}
+
 /** 后端 DTO → 页面 ProjectInitRecord */
 export function mapProjectInitDtoToRecord(dto: ProjectInitDto): ProjectInitRecord {
   return {
@@ -132,6 +157,7 @@ export function mapProjectInitDtoToRecord(dto: ProjectInitDto): ProjectInitRecor
     objective: dto.objective ?? '',
     milestone: dto.milestone ?? '',
     customDevelopmentScope: dto.customDevelopmentScope ?? '',
+    implementationStrategyLines: (dto.implementationStrategyLines ?? []).map(mapImplementationStrategyLine),
     attachmentNames: dto.contractAttachmentNames ?? [],
     contractType: dto.contractType as ContractType,
     signDate: dto.signDate,
@@ -152,6 +178,10 @@ export function mapProjectInitDtoToRecord(dto: ProjectInitDto): ProjectInitRecor
     goLiveSupportLines: (dto.goLiveSupportLines ?? []).map(mapGoLiveSupportLine),
     contractQuoteAmount: dto.contractQuoteAmount,
     requirementAttachmentNames: dto.requirementAttachmentNames ?? [],
+    sowReferenceAttachmentNames: dto.sowReferenceAttachmentNames ?? [],
+    sowReferenceAttachments: dto.sowReferenceAttachments ?? [],
+    orgStructureAttachmentNames: dto.orgStructureAttachmentNames ?? [],
+    orgStructureAttachments: dto.orgStructureAttachments ?? [],
     createTime: dto.createTime,
     creator: dto.creator
   };
@@ -176,6 +206,10 @@ export function mapProjectInitRecordToSave(record: ProjectInitRecord): ProjectIn
     customDevelopmentScope: record.customDevelopmentScope,
     contractAttachmentNames: record.attachmentNames,
     requirementAttachmentNames: record.requirementAttachmentNames,
+    sowReferenceAttachmentNames: record.sowReferenceAttachmentNames,
+    sowReferenceAttachmentIds: collectAttachmentIds(record.sowReferenceAttachments),
+    orgStructureAttachmentNames: record.orgStructureAttachmentNames,
+    orgStructureAttachmentIds: collectAttachmentIds(record.orgStructureAttachments),
     contractType: record.contractType,
     signDate: record.signDate,
     contactPerson: record.contactPerson,
@@ -245,6 +279,21 @@ export function mapProjectInitRecordToSave(record: ProjectInitRecord): ProjectIn
       seq: line.seq || index + 1,
       supportContent: line.supportContent,
       completionCriteria: line.completionCriteria
+    })),
+    implementationStrategyLines: record.implementationStrategyLines.map((line, index) => ({
+      id: /^\d+$/.test(line.id) ? Number(line.id) : undefined,
+      seq: line.seq || index + 1,
+      businessSegment: line.businessSegment,
+      orgScope: line.orgScope,
+      subBranches: line.subBranches,
+      phaseStrategy: line.phaseStrategy,
+      pilot: line.pilot,
+      promotion: line.promotion,
+      promotionResponsible: line.promotionResponsible,
+      locationCentralized: line.locationCentralized,
+      locationDecentralized: line.locationDecentralized,
+      locationRemoteCentralized: line.locationRemoteCentralized,
+      locationRemoteDecentralized: line.locationRemoteDecentralized
     }))
   };
 }
@@ -260,6 +309,7 @@ export function withFreshLineIds(record: ProjectInitRecord): ProjectInitRecord {
     integrationLines: record.integrationLines.map(item => ({ ...item, id: newLineId() })),
     dataConversionLines: record.dataConversionLines.map(item => ({ ...item, id: newLineId() })),
     trainingLines: record.trainingLines.map(item => ({ ...item, id: newLineId() })),
-    goLiveSupportLines: record.goLiveSupportLines.map(item => ({ ...item, id: newLineId() }))
+    goLiveSupportLines: record.goLiveSupportLines.map(item => ({ ...item, id: newLineId() })),
+    implementationStrategyLines: record.implementationStrategyLines.map(item => ({ ...item, id: newLineId() }))
   };
 }

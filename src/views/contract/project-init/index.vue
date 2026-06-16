@@ -116,6 +116,14 @@ function openDetailDrawer(row: ProjectInitRecord) {
   showDetailDrawer.value = true;
 }
 
+function openTaskList(row: ProjectInitRecord) {
+  if (row.status !== 'approved') {
+    ElMessage.warning('仅已立项项目可进入任务清单');
+    return;
+  }
+  router.push({ name: 'contract_project-task', query: { projectId: String(row.id) } });
+}
+
 function onSubmitted() {
   showDrawer.value = false;
   fetchProjectList();
@@ -137,9 +145,11 @@ async function handleDelete(row: ProjectInitRecord) {
 }
 
 function buildSowFileName(row: ProjectInitRecord) {
-  const safeNo = (row.projectNo || String(row.id)).replace(/[\\/:*?"<>|]/g, '_');
-  const stamp = new Date().toISOString().replace(/[-:T]/g, '').slice(0, 14);
-  return `SOW_${safeNo}_${stamp}.docx`;
+  const customerName = (row.customerName || row.partyA || row.projectName || String(row.id)).replace(
+    /[\\/:*?"<>|]/g,
+    '_'
+  );
+  return `实施工作说明书（SOW）_${customerName}_V2.1.docx`;
 }
 
 async function handleGenerateSow(row: ProjectInitRecord) {
@@ -297,8 +307,16 @@ onMounted(async () => {
           <ElTableColumn prop="planEndDate" label="预计完工" width="110" align="center" />
           <ElTableColumn prop="projectManager" label="项目经理" width="100" align="center" />
           <ElTableColumn prop="createTime" label="创建时间" width="160" align="center" show-overflow-tooltip />
-          <ElTableColumn label="操作" width="240" fixed="right" align="center">
+          <ElTableColumn label="操作" width="320" fixed="right" align="center">
             <template #default="{ row }">
+              <ElButton
+                v-if="row.status === 'approved'"
+                size="small"
+                type="warning"
+                @click="openTaskList(row)"
+              >
+                任务清单
+              </ElButton>
               <ElButton v-if="canUpdate" size="small" type="primary" @click="openEditDrawer(row)">编辑</ElButton>
               <ElButton
                 v-if="canGenerateSow"
