@@ -231,6 +231,8 @@ const local: App.I18n.Schema = {
     basedata_product: '产品管理',
     basedata_quoter: '报价器管理',
     'basedata_payment-term': '付款条件',
+    task: '任务管理',
+    task_wbs: '任务池（WBS）',
     contract: '合同管理',
     contract_manage: '合同管理',
     'contract_project-init': '项目立项',

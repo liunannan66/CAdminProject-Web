@@ -72,5 +72,6 @@ export const views: Record<LastLevelRouteKey, RouteComponent | (() => Promise<Ro
   sysmanage_config: () => import("@/views/sysmanage/config/index.vue"),
   "sysmanage_online-user": () => import("@/views/sysmanage/online-user/index.vue"),
   sysmanage_systemstatus: () => import("@/views/sysmanage/systemstatus/index.vue"),
+  task_wbs: () => import("@/views/task/wbs/index.vue"),
   "user-center": () => import("@/views/user-center/index.vue"),
 };

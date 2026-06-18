@@ -242,6 +242,8 @@ const routeMap: RouteMap = {
   "sysmanage_config": "/sysmanage/config",
   "sysmanage_online-user": "/sysmanage/online-user",
   "sysmanage_systemstatus": "/sysmanage/systemstatus",
+  "task": "/task",
+  "task_wbs": "/task/wbs",
   "user-center": "/user-center"
 };
 
